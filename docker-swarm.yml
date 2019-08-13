@@ -1,0 +1,103 @@
+version: '3.6'
+services:
+  web:
+    image: hub.ferumflex.com/ferumflex/scheduler:prod
+    environment:
+      - SERVER=prod
+    volumes:
+      - /data/scheduler/bitbot_media:/opt/django/persistent/media
+    depends_on:
+      - postgres
+    healthcheck:
+      test: "curl -H 'Host: scheduler.ferumflex.com' -f http://localhost || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 1G
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=scheduler"
+        - "traefik.frontend.rule=Host:scheduler.ferumflex.com"
+        - "traefik.docker.network=traefik_frontend"
+        - "traefik.port=80"
+    networks:
+      - backend
+      - traefik_frontend
+
+  postgres:
+    image: postgres:11
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 1G
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=scheduler_user
+      - POSTGRES_DB=Scheduler_database
+    volumes:
+      - /data/scheduler/postgresql_data:/var/lib/postgresql/data
+    networks:
+      - backend
+      
+  beat:
+    command: celery -A scheduler_2 beat --scheduler django
+    image: hub.ferumflex.com/ferumflex/scheduler:prod
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+    environment:
+      - SERVER=prod
+      - C_FORCE_ROOT=1
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - backend
+
+  worker:
+    command: celery -A scheduler_2 worker -E -c 4
+    image: hub.ferumflex.com/ferumflex/scheduler:prod
+    environment:
+      - SERVER=prod
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - postgres
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend
+
+  redis:
+    image: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - /data/scheduler/redis:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - backend    
+  
+networks:
+  backend:
+  traefik_frontend:
+    external: true

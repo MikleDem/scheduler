@@ -1,0 +1,180 @@
+{% extends "adminlte_full/base-layout.html" %}
+{% load bootstrap3 i18n adminlte_full %}
+{% block page_title %}
+    {% if task_id %}
+        Edit your task
+    {% else %}
+        Add your task
+    {% endif %}
+{% endblock %}
+
+{% block page_content %}
+  <!-- Content Wrapper. Contains page content -->
+  <div class="">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h3>Add a datetime for single task or cron task for periodic task (m h dom mon dow)</h3>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% if form.errors and not form.non_field_errors %}
+                        <p>
+                            {% if form.errors.items|length == 1 %}
+                                {% trans "Please correct the error below." %}
+                            {% else %}
+                                {% trans "Please correct the errors below." %}
+                            {% endif %}
+                        </p>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endif %}
+
+{#            {% if user.is_authenticated %}#}
+{#                <p class="login-box-msg">#}
+{#                    {% blocktrans trimmed %}#}
+{#                        You are authenticated as {{ username }}, but are not authorized to#}
+{#                        access this page. Would you like to login to a different account?#}
+{#                    {% endblocktrans %}#}
+{#                </p>#}
+{#            {% endif %}#}
+
+            <form action="{{ app_path }}" method="post" id="login-form" role="form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="form-group has-feedback">
+                    {% bootstrap_field form.task show_label=True %}
+{#                    <span class="glyphicon glyphicon-user form-control-feedback"></span>#}
+                    {{ form.task.errors }}
+                </div>
+                <div class="form-group has-feedback">
+                    {% bootstrap_field form.task_datetime show_label=True %}
+{#                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>#}
+                    {{ form.task_datetime.errors }}
+                </div>
+                <!-- radio -->
+                <div class="form-group">
+                  <div>
+                    <label>OR</label>
+                    <label>Cron task</label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="" {% if form.cron_task.value == '' or form.task_datetime.value %}checked{% endif %}>
+                      No cron
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="* * * * *" {% if form.cron_task.value == '* * * * *' %}checked{% endif %}>
+                      Every minute
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="*/5 * * * *" {% if form.cron_task.value == '*/5 * * * *' %}checked{% endif %}>
+                      Every 5 minutes
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="*/10 * * * *" {% if form.cron_task.value == '*/10 * * * *' %}checked{% endif %}>
+                      Every 10 minutes
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="*/30 * * * *" {% if form.cron_task.value == '*/30 * * * *' %}checked{% endif %}>
+                      Every 30 minutes
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="0 * * * *" {% if form.cron_task.value == '0 * * * *' %}checked{% endif %}>
+                      Every hour
+                    </label>
+                  </div>
+                  <div class="form-group">
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="0 */6 * * *" {% if form.cron_task.value == '0 */6 * * *' %}checked{% endif %}>
+                      Every 6 hours
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="0 0 1 * *" {% if form.cron_task.value == '0 0 1 * *' %}checked{% endif %}>
+                      Every day
+                    </label>
+                  </div>
+                  <div class="radio">
+                    <label>
+                      <input type="radio" class="cron_radio" name="cron_task" value="0 0 0 * 1" {% if form.cron_task.value == '0 0 0 * 1' %}checked{% endif %}>
+                      Every monday
+                    </label>
+                  </div>
+                  <div class="col-lg-6">
+                      <div class="input-group">
+                        <span class="input-group-addon">
+                          <input type="radio" name="cron_task" id="custom_cron_radio">
+                        </span>
+                        <input type="text" class="form-control" name="cron_task" id="custom_cron" disabled />
+                      </div>
+                      <!-- /input-group -->
+                  </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-8">
+                        <!--<div class="checkbox icheck">-->
+                            <!--<label>-->
+                                <!--<input type="checkbox" id="remember_me" name="_remember_me" value="on"> Remember Me-->
+                            <!--</label>-->
+                        <!--</div>-->
+                    </div>
+                    <div class="col-xs-4">
+                        <button type="submit" class="btn btn-primary btn-block btn-flat">
+                            {% if task_id %}
+                                {% trans 'Edit task' %}
+                            {% else %}
+                                {% trans 'Add task' %}
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+{% endblock %}
+{% block javascripts_inline %}
+    <script>
+        {% if form.task_datetime.value %}
+        {% else %}
+            var checked = $('.cron_radio:checked').length;
+            if (!checked) {
+                $('#custom_cron_radio').attr('checked', 'checked');
+                $('#custom_cron').removeAttr('disabled').val('{{ form.cron_task.value }}');
+            }
+        {% endif %}
+
+        $('#custom_cron_radio').click(function(){
+            $('#custom_cron').removeAttr('disabled');
+        });
+
+        $('.cron_radio').click(function(){
+            $('#custom_cron').attr('disabled', 'disabled');
+        });
+
+
+        $('#id_task_datetime').datetimepicker({format: 'Y-m-d H:i'});
+    </script>
+{% endblock %}

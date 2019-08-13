@@ -1,0 +1,66 @@
+{% extends "adminlte_full/base-layout.html" %}
+
+{% block page_title %}Tasks{% endblock %}
+
+{% block page_content %}
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            {% if cron_list|length %}
+                <div class="box-header">
+                  <h3 class="box-title">Data Table</h3>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <table id="example2" class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Task</th>
+                      <th>DateTime</th>
+                      <th>Cron task</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      {% for job in cron_list %}
+                        <tr>
+                          <td>{{ job.id }}</td>
+                          <td>{{ job.task|default:"" }}</td>
+                          <td>{{ job.task_datetime|default:"" }}</td>
+                          <td>{{ job.cron_task|default:"" }}</td>
+                          <td>
+                            <div class="btn-group">
+                              <a class="btn btn-default btn-warning" href="edit_task/{{job.id}}">Edit</a>
+                              <a class="btn btn-default btn-danger" href="delete_task/{{job.id}}">Delete</a>
+                            </div>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    <tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                      <th>ID</th>
+                      <th>Task</th>
+                      <th>DateTime</th>
+                      <th>Cron task</th>
+                    </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              {% else %}
+                <h1>You have no tasks</h1>
+              {% endif %}
+            <!-- /.box-body -->
+          </div>
+        <a class="btn bg-purple btn-flat margin" href="add_task/">Add your task</a>
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+{% endblock %}
